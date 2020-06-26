@@ -1,6 +1,8 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow
 import sys
+
+from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtWidgets import QApplication, QMainWindow
+
 import TeXProcessor
 
 
@@ -69,7 +71,7 @@ class Display(QtWidgets.QLabel):
         super(Display, self).__init__()
         self.setGeometry(0, 0, 200, 200)
         self.image = QtGui.QPixmap()
-        self.image.load('1.png')
+        self.image.load('greeting.png')
         self.setPixmap(self.image)
 
         self.resize(200, 200)
@@ -83,29 +85,38 @@ class Controls(QtWidgets.QWidget):
     def __init__(self):
         super(Controls, self).__init__()
 
-        self.cancel_btn = CancelBtn()
-        self.reset_btn = ResetBtn()
         self.preview_btn = PreviewBtn()
+        self.reset_btn = ResetBtn()
+        self.save_btn = SaveBtn()
 
         layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(self.cancel_btn)
-        layout.addWidget(self.reset_btn)
         layout.addWidget(self.preview_btn)
+        layout.addWidget(self.reset_btn)
+        layout.addWidget(self.save_btn)
         self.setLayout(layout)
 
 
-class CancelBtn(QtWidgets.QPushButton):
+class PreviewBtn(QtWidgets.QPushButton):
     def __init__(self):
-        super(CancelBtn, self).__init__()
+        super(PreviewBtn, self).__init__()
         self.setText("Preview")
         self.clicked.connect(self.commit_text)
 
     def commit_text(self):
         text = self.parentWidget().parentWidget().user_input.get_input()
         window.update_status_bar('Creating preview')
-        TeXProcessor.create_png(text)
-        window.update_status_bar('Created preview')
-        self.parentWidget().parentWidget().display.update()
+        try:
+            TeXProcessor.create_png(text)
+            window.update_status_bar('Created preview')
+            self.parentWidget().parentWidget().display.update()
+        except RuntimeError:
+            print('failed')
+            window.update_status_bar('Improper expression entered')
+
+
+
+
+
 
 
 class ResetBtn(QtWidgets.QPushButton):
@@ -114,9 +125,9 @@ class ResetBtn(QtWidgets.QPushButton):
         self.setText("Reset")
 
 
-class PreviewBtn(QtWidgets.QPushButton):
+class SaveBtn(QtWidgets.QPushButton):
     def __init__(self):
-        super(PreviewBtn, self).__init__()
+        super(SaveBtn, self).__init__()
         self.setText("Save")
 
 
