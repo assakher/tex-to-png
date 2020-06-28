@@ -70,13 +70,14 @@ class Display(QtWidgets.QLabel):
     def __init__(self):
         super(Display, self).__init__()
         self.setGeometry(0, 0, 200, 200)
+        self.setMinimumSize(200, 200)
         self.image = QtGui.QPixmap()
         self.image.load('greeting.png')
         self.setPixmap(self.image)
 
         self.resize(200, 200)
 
-    def update(self) -> None:
+    def update(self):
         self.image.load("temp.png")
         self.setPixmap(self.image)
 
@@ -106,11 +107,11 @@ class PreviewBtn(QtWidgets.QPushButton):
         text = self.parentWidget().parentWidget().user_input.get_input()
         window.update_status_bar('Creating preview')
         try:
-            TeXProcessor.create_png(text)
+            TeXProcessor.latex_to_pdf(text)
+            TeXProcessor.pdf_to_png()
             window.update_status_bar('Created preview')
             self.parentWidget().parentWidget().display.update()
         except RuntimeError:
-            print('failed')
             window.update_status_bar('Improper expression entered')
 
 
@@ -123,6 +124,10 @@ class ResetBtn(QtWidgets.QPushButton):
     def __init__(self):
         super(ResetBtn, self).__init__()
         self.setText("Reset")
+        self.clicked.connect(self.clear_user_input)
+
+    def clear_user_input(self):
+        self.parentWidget().parentWidget().user_input.clear()
 
 
 class SaveBtn(QtWidgets.QPushButton):
