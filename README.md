@@ -1,9 +1,13 @@
 # tex-to-png
- Simple converter of tex math expressions into png images
+ Simple converter of tex math expressions into png images with GUI
  
- ver 0.2
- - Creates temp.png from a given tex expression
+ Dependencies:
+ - PyQt5
+ - latextools
+ - Inkscape
+ - LaTeX installation (MiKTeX or TeX Live)
+ 
+ ver 1.0
  
  TODO:
- - saving to custom path
- - add visual tooltips
+ - add visual tooltips for TeX commands

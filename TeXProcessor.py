@@ -1,4 +1,3 @@
-import io
 import os
 import latextools
 import subprocess
@@ -12,7 +11,7 @@ def latex_to_pdf(tex):
 
 
 def pdf_to_png(source="temp.pdf", output_file="temp.png"):
-    # latextools function adapted to work on Windows_
+    # latextools function adapted to work on Windows
     cwd = os.getcwd()
     args = f'inkscape -z -D --export-dpi=300 --export-png={output_file} ' + source
     try:
@@ -29,9 +28,6 @@ def pdf_to_png(source="temp.pdf", output_file="temp.png"):
             msg += stderr.decode()
         raise RuntimeError(msg)
 
-
-#latex_to_pdf(r'\frac{x^2+5x+123}{y^6+45y-546}')
-#pdf_to_png()
 
 
 
