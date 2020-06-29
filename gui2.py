@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 import TeXProcessor
@@ -23,7 +23,6 @@ class MainWindow(QMainWindow):
         central_widget = CentralWidget()
         self.setCentralWidget(central_widget)
         self.central_widget = central_widget
-
 
     def create_status_bar(self):
         self.status_bar = self.statusBar()
@@ -48,7 +47,7 @@ class CentralWidget(QtWidgets.QWidget):
 
 class Tooltips(QtWidgets.QTabBar):
     def __init__(self):
-        super(Tooltips,self).__init__()
+        super(Tooltips, self).__init__()
 
 
 class Workspace(QtWidgets.QWidget):
@@ -60,7 +59,7 @@ class Workspace(QtWidgets.QWidget):
         self.user_input = UserInput()
 
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.display)
+        layout.addWidget(self.display, alignment=QtCore.Qt.AlignCenter)
         layout.addWidget(self.controls)
         layout.addWidget(self.user_input)
         self.setLayout(layout)
@@ -70,15 +69,17 @@ class Display(QtWidgets.QLabel):
     def __init__(self):
         super(Display, self).__init__()
         self.setGeometry(0, 0, 200, 200)
+        self.setMinimumSize(200, 200)
         self.image = QtGui.QPixmap()
         self.image.load('greeting.png')
         self.setPixmap(self.image)
 
         self.resize(200, 200)
 
-    def update(self) -> None:
+    def update(self):
         self.image.load("temp.png")
         self.setPixmap(self.image)
+        self.resize(200, 200)
 
 
 class Controls(QtWidgets.QWidget):
@@ -106,29 +107,40 @@ class PreviewBtn(QtWidgets.QPushButton):
         text = self.parentWidget().parentWidget().user_input.get_input()
         window.update_status_bar('Creating preview')
         try:
-            TeXProcessor.create_png(text)
+            TeXProcessor.latex_to_pdf(text)
+            TeXProcessor.pdf_to_png()
             window.update_status_bar('Created preview')
             self.parentWidget().parentWidget().display.update()
         except RuntimeError:
-            print('failed')
             window.update_status_bar('Improper expression entered')
-
-
-
-
-
 
 
 class ResetBtn(QtWidgets.QPushButton):
     def __init__(self):
         super(ResetBtn, self).__init__()
         self.setText("Reset")
+        self.clicked.connect(self.clear_user_input)
+
+    def clear_user_input(self):
+        self.parentWidget().parentWidget().user_input.clear()
 
 
 class SaveBtn(QtWidgets.QPushButton):
     def __init__(self):
         super(SaveBtn, self).__init__()
         self.setText("Save")
+        self.clicked.connect(self.save_file_dialog)
+
+    def save_file_dialog(self):
+        options = QtWidgets.QFileDialog.Options()
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+                                                            "Save", "untitled", "PNG Image (*.png)",
+                                                            options=options)
+        if filename:
+            try:
+                TeXProcessor.pdf_to_png(output_file=filename)
+            except PermissionError:
+                pass
 
 
 class UserInput(QtWidgets.QTextEdit):
@@ -137,6 +149,7 @@ class UserInput(QtWidgets.QTextEdit):
 
     def get_input(self):
         return self.toPlainText()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
